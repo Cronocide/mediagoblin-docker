@@ -1,11 +1,8 @@
-FROM ubuntu
-ENV PROJ_NAME=python-tool
-
-# Install Python
-FROM python:3.10.6 as PYTHON
+FROM debian
+ENV PROJ_NAME=mediagoblin-docker
 
 # Copy project files
-ADD ./ /$PROJ_NAME
+ADD ./entrypoint.sh /entrypoint.sh
 
 # Run entrypoint
-ENTRYPOINT [""]
+ENTRYPOINT ["/entrypoint.sh"]

@@ -1,12 +1,12 @@
-# python-template
+# mediagoblin-docker
+A ready-to-use MediaGoblin container built according to the recommended installation guidelines.
 
-Template repository for Docker image creation and deployment.
+*_Note: This is NOT an official MediaGoblin container. There wasn't one when I created this, which is why I created it._*
 
+# Container info
 
-# Deployment Checklist
+# Volume mappings
 
-* Add Jenkins user to project as a Developer in Git
-* Write the description in the Jenkinsfile env variable
-* Add a private Github push mirror
-* Rename the project in the README
-* Delete this checklist from the README
+# Environment Variables
+
+_Intial README. Not a real README._
