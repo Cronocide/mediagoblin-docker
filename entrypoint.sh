@@ -6,11 +6,13 @@
 PORT_REGEX='^[0-9]{1,5}$'
 
 __set_defaults() {
+	export BROKER_URL="$RABBIT_AMQP_URL"
 	[ -z "$BIND_PORT" ] && export BIND_PORT=8080
 #	[ -z "$POSTGRES_DB" ] && export POSTGRES_DB=mediagoblin
 #	[ -z "$POSTGRES_USER" ] && export POSTGRES_USER=mediagoblin
 #	[ -z "$POSTGRES_HOST" ] && export POSTGRES_HOST=127.0.0.1
 #	[ -z "$POSTGRES_PORT" ] && export POSTGRES_HOST=5432
+	[ -z "$BROKER_URL" ] && export BROKER_URL="amqp://guest:**@localhost:5672/"
 	# Configured defaults from deploy guide
 	export CELERY_CONFIG_MODULE=mediagoblin.init.celery.from_celery
 }
@@ -36,6 +38,10 @@ __verify_env() {
 	done
 }
 
+__verify_services() {
+	curl "$BROKER_URL" || echo "Unable to contact rabbitmq server at $BROKER_URL" && return 1
+}
+
 # Create admin user
 __create_user() {
 	/srv/mediagoblin/mediagoblin/bin/gmg adduser --username "$ADMIN_USERNAME" --email "$ADMIN_EMAIL"
@@ -45,6 +51,10 @@ __create_user() {
 __run_main() {
 	# Link user (media) directories
 	ln /srv/mediagoblin/mediagoblin/user_dev/ /data/
+	# Verify required services are running
+	__verify_services && echo "Missing required services, aborting." && exit 1
+	# Run rabbitmq
+	sudo -u rabbitmq rabbitmq-server &
 	# Run nginx
 	nginx &
 	# Run MediaGoblin

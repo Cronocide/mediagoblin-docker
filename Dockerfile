@@ -1,19 +1,20 @@
-FROM debian
+FROM python:3.9-bullseye as PYTHON
+# FROM debian
 ENV PROJ_NAME=mediagoblin-docker
 ARG DEBIAN_FRONTEND=noninteractive
-
+# RUN apt search python3 && exit 1
 # Install dependencies
 RUN apt update && apt install -y \
+	sudo \
 	automake \
 	git \
 	nodejs \
 	npm \
-	python3-dev \
 	python3-gst-1.0 \
 	python3-psycopg2 \
 	python3-lxml \
 	python3-pil \
-	python3-setuptools \
+	python3-gi \
 	virtualenv \
 	nginx \
 	rabbitmq-server
@@ -34,6 +35,9 @@ RUN usermod --append --groups $USER_NAME $USER_NAME
 RUN mkdir --parents /srv/mediagoblin
 RUN chown --no-dereference --recursive $USER_NAME:www-data /srv/mediagoblin
 RUN chown --recursive $USER_NAME:www-data /etc/nginx
+RUN chown --recursive $USER_NAME:www-data /var/lib/nginx
+# Configure sudo permissions for the running user to laucnh things like rabbiitmq, etc
+RUN echo "$USER_NAME ALL=(rabbitmq:rabbitmq) NOPASSWD:ALL" >> /etc/sudoers
 USER $USER_NAME
 RUN git clone --depth=1 https://git.savannah.gnu.org/git/mediagoblin.git \
 	--branch $BUILD_BRANCH \
