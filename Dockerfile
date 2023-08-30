@@ -16,7 +16,6 @@ RUN apt update && apt install -y \
 	python3-pil \
 	python3-gi \
 	virtualenv \
-	nginx \
 	rabbitmq-server
 # Setup user
 ARG USER_UID=999
@@ -34,9 +33,7 @@ RUN useradd \
 RUN usermod --append --groups $USER_NAME $USER_NAME
 RUN mkdir --parents /srv/mediagoblin
 RUN chown --no-dereference --recursive $USER_NAME:www-data /srv/mediagoblin
-RUN chown --recursive $USER_NAME:www-data /etc/nginx
-RUN chown --recursive $USER_NAME:www-data /var/lib/nginx
-# Configure sudo permissions for the running user to laucnh things like rabbiitmq, etc
+# Configure sudo permissions for the running user to launch rabbitmq
 RUN echo "$USER_NAME ALL=(rabbitmq:rabbitmq) NOPASSWD:ALL" >> /etc/sudoers
 USER $USER_NAME
 RUN git clone --depth=1 https://git.savannah.gnu.org/git/mediagoblin.git \
@@ -50,9 +47,20 @@ RUN ./configure
 ENV SETUPTOOLS_USE_DISTUTILS=stdlib
 RUN make
 
+# Install sqlalchemy-migrate for future db updates
+RUN /srv/mediagoblin/mediagoblin/bin/pip3 install sqlalchemy-migrate
+
+# Link /data directory
+USER root
+RUN mkdir /data
+RUN ln -s /srv/mediagoblin/mediagoblin/user_dev/ /data/
+USER $USER_NAME
+
+# Prepare DB
+RUN /srv/mediagoblin/mediagoblin/bin/gmg dbupdate
+
 # Copy project files
 ADD ./entrypoint.sh /entrypoint.sh
-ADD ./nginx.conf /etc/nginx/conf.d/
 
 # Run entrypoint
 ENTRYPOINT ["/entrypoint.sh"]
