@@ -1,3 +1,7 @@
+
+ ![MediaGoblin on Docker](home_goblin.png "MediaGoblin on Docker")
+
+
 # mediagoblin-docker
 A ready-to-use [MediaGoblin](https://mediagoblin.org/) container built according to [the recommended installation](https://docs.mediagoblin.org/en/stable/siteadmin/deploying.html) guidelines.
 
