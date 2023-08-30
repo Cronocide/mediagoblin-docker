@@ -43,7 +43,7 @@ __fix_bind() {
 __run_main() {
 	echo "Using config at path $MEDIAGOBLIN_CONFIG"
 	echo "Database URL:"
-	cat "$MEDIAGOBLIN_CONFIG" | grep -e -v "^#" | grep sql_engine
+	grep sql_engine "$MEDIAGOBLIN_CONFIG" | grep -v "#"
 	__fix_bind
 	__update_db
 	__create_user
@@ -55,6 +55,12 @@ __run_main() {
 	export CELERY_ALWAYS_EAGER=true
 	export CELERY_CONFIG_MODULE=mediagoblin.init.celery.from_celery
 	/srv/mediagoblin/mediagoblin/bin/celery worker -B &
+	while true; do
+		sleep 10
+		[[ $(ps aux | grep rabbitmq-server) == "" ]] && sudo -u rabbitmq rabbitmq-server & disown
+		[[ $(ps aux | grep "celery worker") == "" ]] && /srv/mediagoblin/mediagoblin/bin/celery worker -B &
+		[[ $(ps aux | grep "paster serve") == "" ]] && /srv/mediagoblin/mediagoblin/bin/paster serve paste.ini --reload &
+	done
 	sleep infinity
 }
 
