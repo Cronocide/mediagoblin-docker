@@ -13,7 +13,7 @@ __set_defaults() {
 __verify_env() {
 	# Install template if neccessary
 	[ -e /data/mediagoblin.ini ] || (echo "[WARN] : Missing /data/mediagoblin.ini, copying template for use." && cp /srv/mediagoblin/mediagoblin/mediagoblin.ini /data/mediagoblin.ini)
-	[ -e /data/mediagoblin.db ] || (echo "[INFO] : Missing /data/mediagoblin.db. Creating it just in case we're not going to use postgres." && touch /srv/mediagoblin/mediagoblin/mediagoblin.db)
+	[ -e /data/mediagoblin.db ] || (echo "[INFO] : Missing /data/mediagoblin.db. Creating it just in case we're not going to use postgres." && touch /data/mediagoblin.db)
 	# Check for required vars
 	REQUIRED_ENV_VARS="BIND_PORT ADMIN_USERNAME ADMIN_EMAIL ADMIN_PASSWORD MEDIAGOBLIN_CONFIG"
 	for REQUIRED_VAR in $(echo "$REQUIRED_ENV_VARS"); do
@@ -29,8 +29,8 @@ __update_db() {
 
 # Create admin user
 __create_user() {
-	/srv/mediagoblin/mediagoblin/bin/gmg adduser --username "$ADMIN_USERNAME" --email "$ADMIN_EMAIL" --password "$ADMIN_PASSWORD"
-	/srv/mediagoblin/mediagoblin/bin/gmg makeadmin "$ADMIN_USERNAME"
+	/srv/mediagoblin/mediagoblin/bin/gmg --conf_file "$MEDIAGOBLIN_CONFIG" adduser --username "$ADMIN_USERNAME" --email "$ADMIN_EMAIL" --password "$ADMIN_PASSWORD"
+	/srv/mediagoblin/mediagoblin/bin/gmg --conf_file "$MEDIAGOBLIN_CONFIG" makeadmin "$ADMIN_USERNAME"
 }
 
 # Fix the dumb baked stuff
@@ -38,6 +38,8 @@ __fix_paste() {
 	sed -i "s#host = 127.0.0.1#host = 0.0.0.0#" /srv/mediagoblin/mediagoblin/paste.ini
 	sed -i "s#port = 6543#port = $BIND_PORT#" /srv/mediagoblin/mediagoblin/paste.ini
 	sed -i "s@config = %(here)s/mediagoblin_local.ini %(here)s/mediagoblin.ini@config = $MEDIAGOBLIN_CONFIG@" /srv/mediagoblin/mediagoblin/paste.ini
+	# Change media relative paths to `/data`
+	sed -i "s#%(here)s#/data#" /srv/mediagoblin/mediagoblin/paste.ini
 }
 
 # Main run loop
