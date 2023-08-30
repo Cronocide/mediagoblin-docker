@@ -1,9 +1,7 @@
 # mediagoblin-docker
-A ready-to-use MediaGoblin container built according to the recommended installation guidelines.
+A ready-to-use [MediaGoblin](https://mediagoblin.org/) container built according to [the recommended installation](https://docs.mediagoblin.org/en/stable/siteadmin/deploying.html) guidelines.
 
 *_Note: This is NOT an official MediaGoblin container. There wasn't one when I created this, which is why I created it._*
-
-## Container info
 
 ## Security
 
