@@ -12,8 +12,8 @@ __set_defaults() {
 # Verify environment variables
 __verify_env() {
 	# Install template if neccessary
-	[ -e /data/mediagoblin.ini ] || echo "[WARN] : Missing /data/mediagoblin.ini, copying template for use." && cp /srv/mediagoblin/mediagoblin/mediagoblin.ini /data/mediagoblin.ini
-	[ -e /data/mediagoblin.db ] || echo "[INFO] : Missing /data/mediagoblin.db. Creating it just in case we're not going to use postgres." && touch /srv/mediagoblin/mediagoblin/mediagoblin.db
+	[ -e /data/mediagoblin.ini ] || (echo "[WARN] : Missing /data/mediagoblin.ini, copying template for use." && cp /srv/mediagoblin/mediagoblin/mediagoblin.ini /data/mediagoblin.ini)
+	[ -e /data/mediagoblin.db ] || (echo "[INFO] : Missing /data/mediagoblin.db. Creating it just in case we're not going to use postgres." && touch /srv/mediagoblin/mediagoblin/mediagoblin.db)
 	# Check for required vars
 	REQUIRED_ENV_VARS="BIND_PORT ADMIN_USERNAME ADMIN_EMAIL ADMIN_PASSWORD MEDIAGOBLIN_CONFIG"
 	for REQUIRED_VAR in $(echo "$REQUIRED_ENV_VARS"); do
@@ -33,10 +33,11 @@ __create_user() {
 	/srv/mediagoblin/mediagoblin/bin/gmg makeadmin "$ADMIN_USERNAME"
 }
 
-# Fix the dumb baked bind
-__fix_bind() {
+# Fix the dumb baked stuff
+__fix_paste() {
 	sed -i "s#host = 127.0.0.1#host = 0.0.0.0#" /srv/mediagoblin/mediagoblin/paste.ini
 	sed -i "s#port = 6543#port = $BIND_PORT#" /srv/mediagoblin/mediagoblin/paste.ini
+	sed -i "s@config = %(here)s/mediagoblin_local.ini %(here)s/mediagoblin.ini@config = $MEDIAGOBLIN_CONFIG@" /srv/mediagoblin/mediagoblin/paste.ini
 }
 
 # Main run loop
@@ -44,7 +45,7 @@ __run_main() {
 	echo "Using config at path $MEDIAGOBLIN_CONFIG"
 	echo "Database URL:"
 	grep sql_engine "$MEDIAGOBLIN_CONFIG" | grep -v "#"
-	__fix_bind
+	__fix_paste
 	__update_db
 	__create_user
 	# Run rabbitmq
@@ -56,10 +57,10 @@ __run_main() {
 	export CELERY_CONFIG_MODULE=mediagoblin.init.celery.from_celery
 	/srv/mediagoblin/mediagoblin/bin/celery worker -B &
 	while true; do
-		sleep 10
-		[[ $(ps aux | grep rabbitmq-server) == "" ]] && sudo -u rabbitmq rabbitmq-server & disown
-		[[ $(ps aux | grep "celery worker") == "" ]] && /srv/mediagoblin/mediagoblin/bin/celery worker -B &
-		[[ $(ps aux | grep "paster serve") == "" ]] && /srv/mediagoblin/mediagoblin/bin/paster serve paste.ini --reload &
+		sleep 7
+		[[ $(ps aux | grep rabbitmq-server | grep -v grep) == "" ]] && sudo -u rabbitmq rabbitmq-server & disown
+		[[ $(ps aux | grep "celery worker" | grep -v grep) == "" ]] && /srv/mediagoblin/mediagoblin/bin/celery worker -B &
+		[[ $(ps aux | grep "paster serve" | grep -v grep) == "" ]] && /srv/mediagoblin/mediagoblin/bin/paster serve paste.ini --reload &
 	done
 	sleep infinity
 }
