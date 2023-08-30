@@ -24,7 +24,7 @@ __verify_env() {
 # Verify and update database
 __update_db() {
 	echo "Running \`gmg dbupdate\`"
-	/srv/mediagoblin/mediagoblin/bin/gmg dbupdate
+	/srv/mediagoblin/mediagoblin/bin/gmg --conf_file "$MEDIAGOBLIN_CONFIG" dbupdate
 }
 
 # Create admin user
@@ -57,7 +57,7 @@ __run_main() {
 	export CELERY_CONFIG_MODULE=mediagoblin.init.celery.from_celery
 	/srv/mediagoblin/mediagoblin/bin/celery worker -B &
 	while true; do
-		sleep 7
+		sleep 10
 		[[ $(ps aux | grep rabbitmq-server | grep -v grep) == "" ]] && echo "Restarting rabbitmq-server..." && sudo -u rabbitmq rabbitmq-server & disown
 		[[ $(ps aux | grep "celery worker -B" | grep -v grep) == "" ]] && echo "Restarting celery worker..." && /srv/mediagoblin/mediagoblin/bin/celery worker -B &
 		[[ $(ps aux | grep "paster serve" | grep -v grep) == "" ]] && echo "Restarting paster..." && /srv/mediagoblin/mediagoblin/bin/paster serve paste.ini --reload &
