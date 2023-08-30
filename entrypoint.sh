@@ -41,6 +41,9 @@ __fix_bind() {
 
 # Main run loop
 __run_main() {
+	echo "Using config at path $MEDIAGOBLIN_CONFIG"
+	echo "Database URL:"
+	cat "$MEDIAGOBLIN_CONFIG" | grep -e -v "^#" | grep sql_engine
 	__fix_bind
 	__update_db
 	__create_user
@@ -51,7 +54,6 @@ __run_main() {
 	# Run Celery
 	export CELERY_ALWAYS_EAGER=true
 	export CELERY_CONFIG_MODULE=mediagoblin.init.celery.from_celery
-#	export MEDIAGOBLIN_CONFIG="$MEDIAGOBLIN_INI_PATH"
 	/srv/mediagoblin/mediagoblin/bin/celery worker -B &
 	sleep infinity
 }
