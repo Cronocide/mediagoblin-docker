@@ -11,9 +11,10 @@ __set_defaults() {
 # Verify environment variables
 __verify_env() {
 	# Install template if neccessary
-	[ -e /data/mediagoblin.ini ] || echo "[WARNING] : Missing /data/mediagoblin.ini, copying template for use." && cp /srv/mediagoblin/mediagoblin/mediagoblin.ini /data/mediagoblin.ini
+	[ -e /data/mediagoblin.ini ] || echo "[WARN] : Missing /data/mediagoblin.ini, copying template for use." && cp /srv/mediagoblin/mediagoblin/mediagoblin.ini /data/mediagoblin.ini
+	[ -e /data/mediagoblin.db ] || echo "[INFO] : Missing /data/mediagoblin.db. Creating it just in case we're not going to use postgres." && touch /srv/mediagoblin/mediagoblin/mediagoblin.db
 	# Check for required vars
-	REQUIRED_ENV_VARS="BIND_PORT SERVER_NAME ADMIN_USERNAME ADMIN_EMAIL ADMIN_PASSWORD"
+	REQUIRED_ENV_VARS="BIND_PORT ADMIN_USERNAME ADMIN_EMAIL ADMIN_PASSWORD"
 	for REQUIRED_VAR in $(echo "$REQUIRED_ENV_VARS"); do
 		[ -z "${!REQUIRED_VAR}" ] && echo "Missing required ENV variable $REQUIRED_VAR, aborting." && exit 1
 	done
