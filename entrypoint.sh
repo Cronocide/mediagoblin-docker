@@ -6,6 +6,7 @@ __set_defaults() {
 	export BROKER_URL="$RABBIT_AMQP_URL"
 	[ -z "$BIND_PORT" ] && export BIND_PORT=6543
 	[ -z "$BROKER_URL" ] && export BROKER_URL="amqp://guest:**@localhost:5672/"
+	[ -z "$MEDIAGOBLIN_CONFIG" ] && export MEDIAGOBLIN_CONFIG="/data/mediagoblin.ini"
 }
 
 # Verify environment variables
@@ -14,7 +15,7 @@ __verify_env() {
 	[ -e /data/mediagoblin.ini ] || echo "[WARN] : Missing /data/mediagoblin.ini, copying template for use." && cp /srv/mediagoblin/mediagoblin/mediagoblin.ini /data/mediagoblin.ini
 	[ -e /data/mediagoblin.db ] || echo "[INFO] : Missing /data/mediagoblin.db. Creating it just in case we're not going to use postgres." && touch /srv/mediagoblin/mediagoblin/mediagoblin.db
 	# Check for required vars
-	REQUIRED_ENV_VARS="BIND_PORT ADMIN_USERNAME ADMIN_EMAIL ADMIN_PASSWORD"
+	REQUIRED_ENV_VARS="BIND_PORT ADMIN_USERNAME ADMIN_EMAIL ADMIN_PASSWORD MEDIAGOBLIN_CONFIG"
 	for REQUIRED_VAR in $(echo "$REQUIRED_ENV_VARS"); do
 		[ -z "${!REQUIRED_VAR}" ] && echo "Missing required ENV variable $REQUIRED_VAR, aborting." && exit 1
 	done
@@ -50,7 +51,7 @@ __run_main() {
 	# Run Celery
 	export CELERY_ALWAYS_EAGER=true
 	export CELERY_CONFIG_MODULE=mediagoblin.init.celery.from_celery
-	export MEDIAGOBLIN_CONFIG=/data/mediagoblin.ini
+#	export MEDIAGOBLIN_CONFIG="$MEDIAGOBLIN_INI_PATH"
 	/srv/mediagoblin/mediagoblin/bin/celery worker -B &
 	sleep infinity
 }
