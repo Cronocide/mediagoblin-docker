@@ -58,9 +58,9 @@ __run_main() {
 	/srv/mediagoblin/mediagoblin/bin/celery worker -B &
 	while true; do
 		sleep 7
-		[[ $(ps aux | grep rabbitmq-server | grep -v grep) == "" ]] && sudo -u rabbitmq rabbitmq-server & disown
-		[[ $(ps aux | grep "celery worker" | grep -v grep) == "" ]] && /srv/mediagoblin/mediagoblin/bin/celery worker -B &
-		[[ $(ps aux | grep "paster serve" | grep -v grep) == "" ]] && /srv/mediagoblin/mediagoblin/bin/paster serve paste.ini --reload &
+		[[ $(ps aux | grep rabbitmq-server | grep -v grep) == "" ]] && echo "Restarting rabbitmq-server..." && sudo -u rabbitmq rabbitmq-server & disown
+		[[ $(ps aux | grep "celery worker -B" | grep -v grep) == "" ]] && echo "Restarting celery worker..." && /srv/mediagoblin/mediagoblin/bin/celery worker -B &
+		[[ $(ps aux | grep "paster serve" | grep -v grep) == "" ]] && echo "Restarting paster..." && /srv/mediagoblin/mediagoblin/bin/paster serve paste.ini --reload &
 	done
 	sleep infinity
 }
