@@ -23,11 +23,11 @@ docker run -v ~/Desktop/media:/data mediagoblin-docker
 
 ## Configuration
 
-Mediagoblin is configured through `mediagoblin.ini` which lives at `$MEDIAGOBLIN_CONFIG`. It is created if it does not exist when the container starts. This file contains all the configuration for Mediagoblin. Some of the important configuration items that need set up are listed below. For a full list of configuration options, see [the configuration spec](https://git.sr.ht/~mediagoblin/mediagoblin/tree/master/item/mediagoblin/config_spec.ini).
+Mediagoblin is configured through `mediagoblin.ini` which lives at `$MEDIAGOBLIN_CONFIG`. It is created if it does not exist when the container starts. This file contains all the configuration for Mediagoblin. Some of the important configuration items that need set up are listed below. For a full list of configuration options, see [the configuration spec](https://git.sr.ht/~mediagoblin/mediagoblin/tree/master/item/mediagoblin/config_spec.ini). I highly recommend a thorough read through of these options if considering a production deployment.
 
 ### [DEFAULT]
 
-`data_basedir` *_(Required)_* : The data directory to story media uploaded to Mediagoblin at. `%(here)s/user_dev` by default.
+`data_basedir` *_(Required)_* : The data directory to story media uploaded to Mediagoblin at. This *must* be set to `/data/` to match what is in `paste.ini`, or else you will get `404`'s when trying to access uploaded content.
 
 ### [mediagoblin]
 
@@ -70,9 +70,3 @@ To build a copy of the container yourself, optionally set the container username
 cd mediagoblin-docker
 docker build -t mediagoblin .
 ```
-
-## Advanced Configuration
-
-* This container comes with a `rabbitmq-server` for media upload processing by default. To make mediagoblin use a different `rabbitmq-server`, set its AMPQ URL in `RABBIT_AMQP_URL`. It should be in the format `amqp://guest:**@localhost:5672/` (which is the default).
-
-* Medigoblin's media directory can be configured relative to the `data` directory, or anywhere else you'd like it. Set `data_basedir` in the `$MEDIAGOBLIN_CONFIG` file. It is `%(here)s/user_dev` (which resolves to `/data/user_dev`) byt default.

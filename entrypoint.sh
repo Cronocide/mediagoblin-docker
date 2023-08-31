@@ -3,9 +3,7 @@
 # v1.0 August 2023 by Cronocide
 
 __set_defaults() {
-	export BROKER_URL="$RABBIT_AMQP_URL"
 	[ -z "$BIND_PORT" ] && export BIND_PORT=6543
-	[ -z "$BROKER_URL" ] && export BROKER_URL="amqp://guest:**@localhost:5672/"
 	[ -z "$MEDIAGOBLIN_CONFIG" ] && export MEDIAGOBLIN_CONFIG="/data/mediagoblin.ini"
 }
 
@@ -35,11 +33,14 @@ __create_user() {
 
 # Fix the dumb baked stuff
 __fix_paste() {
+	# Fix binding
 	sed -i "s#host = 127.0.0.1#host = 0.0.0.0#" /srv/mediagoblin/mediagoblin/paste.ini
 	sed -i "s#port = 6543#port = $BIND_PORT#" /srv/mediagoblin/mediagoblin/paste.ini
+	# Hard set the config to the path the user specified
 	sed -i "s@config = %(here)s/mediagoblin_local.ini %(here)s/mediagoblin.ini@config = $MEDIAGOBLIN_CONFIG@" /srv/mediagoblin/mediagoblin/paste.ini
 	# Change media relative paths to `/data`
 	sed -i "s#%(here)s#/data#" /srv/mediagoblin/mediagoblin/paste.ini
+	sed -i "s#/user_dev##" /srv/mediagoblin/mediagoblin/paste.ini
 }
 
 # Main run loop
