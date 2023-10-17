@@ -15,6 +15,14 @@ RUN apt update && apt install -y \
 	python3-lxml \
 	python3-pil \
 	python3-gi \
+	gstreamer1.0-tools \
+	gir1.2-gstreamer-1.0 \
+	gir1.2-gst-plugins-base-1.0 \
+	gstreamer1.0-plugins-base \
+	gstreamer1.0-plugins-bad \
+	gstreamer1.0-plugins-good \
+	gstreamer1.0-plugins-ugly \
+	gstreamer1.0-libav python3-gst-1.0 \
 	virtualenv \
 	rabbitmq-server
 # Setup user
